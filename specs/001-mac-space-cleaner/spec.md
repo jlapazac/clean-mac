@@ -12,6 +12,27 @@ qué borrar. Debe incluir: análisis de espacio (ranking de carpetas), desinstal
 tamaño real de cada app incluyendo sus restos en Library, limpieza de cachés de desarrollo (npm,
 Docker, .cache, Xcode DerivedData) y borrado seguro (siempre a la Papelera, con confirmación)."
 
+## Clarifications
+
+### Session 2026-10-24
+
+- Q: ¿Puede el usuario mover elementos a la Papelera directamente desde el análisis de espacio, o
+  solo verlos? → A: Sí, puede marcar elementos del análisis y moverlos a la Papelera con la misma
+  confirmación y protecciones que el resto de la app.
+- Q: ¿En qué ubicaciones y con qué regla se buscan los restos de una app? → A: En las carpetas
+  estándar de `~/Library` (Application Support, Containers, Group Containers, Caches, Preferences,
+  Logs, Saved Application State, HTTPStorages, WebKit, Cookies, LaunchAgents); coincidencia exacta
+  por identificador = confianza alta (marcado), coincidencia por nombre de la app o prefijo de
+  identificador = ambigua (desmarcado).
+- Q: ¿Se guardan los resultados del análisis entre sesiones? → A: No; cada apertura analiza de
+  nuevo y los resultados viven solo en memoria.
+- Q: ¿Cómo se muestran los elementos muy pequeños en el desglose de una carpeta? → A: Se listan
+  individualmente los elementos de 1 MB o más; los menores se agrupan en una fila "Otros elementos
+  pequeños" con su tamaño total.
+- Q: ¿Cómo se instala y se abre la app? → A: Como aplicación `.app` normal generada por un script
+  de empaquetado local, para que el usuario pueda concederle Acceso Total al Disco desde Ajustes del
+  Sistema; también puede ejecutarse en modo desarrollo.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ver qué está ocupando el espacio (Priority: P1)
@@ -37,6 +58,9 @@ ubicaciones más grandes con tamaños coherentes con los que reporta el sistema.
    subcarpetas/archivos ordenados por tamaño y puede volver al nivel anterior.
 4. **Given** una ubicación sin permiso de lectura, **When** termina el análisis, **Then** la app
    indica cuántas ubicaciones no pudo leer y sugiere conceder Acceso Total al Disco.
+5. **Given** el desglose de una ubicación, **When** el usuario marca uno o varios elementos y pide
+   moverlos a la Papelera, **Then** ve la confirmación con la lista y el total, y tras aceptar los
+   elementos se mueven a la Papelera y los tamaños se actualizan.
 
 ---
 
@@ -127,16 +151,26 @@ el contenido está en la Papelera y que la carpeta raíz de la caché sigue exis
 - **FR-005**: La app MUST reportar el número de ubicaciones que no pudo leer y explicar cómo
   conceder Acceso Total al Disco.
 - **FR-006**: Los usuarios MUST poder revelar cualquier elemento listado en Finder.
+- **FR-006a**: Los usuarios MUST poder marcar elementos del análisis y moverlos a la Papelera,
+  sujeto a FR-015–FR-018; los elementos protegidos no pueden marcarse.
+- **FR-006b**: En el desglose, los elementos de 1 MB o más MUST listarse individualmente y los
+  menores MUST agruparse en una fila "Otros elementos pequeños" (no seleccionable) con su total.
+- **FR-006c**: Los resultados del análisis MUST mantenerse solo en memoria durante la sesión; no
+  se guardan en disco.
 
 **Desinstalador**
 
 - **FR-007**: La app MUST listar las aplicaciones instaladas en las carpetas de Aplicaciones del
   sistema y del usuario, con nombre, icono, versión, tamaño del paquete, tamaño de restos y total.
-- **FR-008**: La app MUST localizar los restos de cada app en las ubicaciones estándar de la
-  Library del usuario usando el identificador de la app y su nombre.
-- **FR-009**: Cada resto MUST mostrar ruta, tamaño y motivo de la coincidencia; las coincidencias
-  exactas por identificador se marcan por defecto y las coincidencias solo por nombre quedan
-  desmarcadas.
+- **FR-008**: La app MUST localizar los restos de cada app en estas carpetas de la Library del
+  usuario: Application Support, Containers, Group Containers, Caches, Preferences, Logs, Saved
+  Application State, HTTPStorages, WebKit, Cookies y LaunchAgents, usando el identificador de la
+  app y su nombre.
+- **FR-009**: Cada resto MUST mostrar ruta, tamaño y motivo de la coincidencia. Confianza alta
+  (marcado por defecto): el nombre del elemento es exactamente el identificador, o el identificador
+  seguido de una extensión o sufijo (p. ej. `.plist`, `.savedState`). Confianza ambigua (desmarcado
+  por defecto): el nombre coincide con el nombre visible de la app, o el elemento comparte el
+  prefijo de organización del identificador (p. ej. Group Containers con prefijo de equipo).
 - **FR-010**: La app MUST impedir desinstalar una app que esté en ejecución, apps del sistema de
   Apple y la propia CleanMac.
 - **FR-011**: Los usuarios MUST poder buscar apps por nombre y ordenar por nombre o tamaño.
@@ -206,5 +240,8 @@ el contenido está en la Papelera y que la carpeta raíz de la caché sigue exis
 - Vaciar la Papelera es responsabilidad del usuario; la app le recuerda que el espacio se libera al
   vaciarla.
 - La interfaz está en español.
+- La app se distribuye como un `.app` generado localmente por un script de empaquetado (firma ad
+  hoc, sin notarización) para poder recibir Acceso Total al Disco; también se ejecuta en modo
+  desarrollo.
 - No se incluyen en esta versión: limpieza programada, monitorización en segundo plano, detección
   de duplicados, malware ni optimización de memoria.
