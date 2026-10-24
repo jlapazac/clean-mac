@@ -73,7 +73,7 @@
 
 | ID | Nombre | Ruta(s) | Riesgo |
 |---|---|---|---|
-| npm | Caché de npm | `~/.npm/_cacache` | Bajo |
+| npm | Caché de npm | `~/.npm/_cacache`, `~/.npm/_npx` | Bajo |
 | userCache | Caché general (~/.cache) | `~/.cache` | Bajo |
 | libraryCaches | Cachés de apps | `~/Library/Caches` | Bajo |
 | xcodeDerived | Datos derivados de Xcode | `~/Library/Developer/Xcode/DerivedData` | Bajo |
@@ -95,7 +95,7 @@
   `/var`, `/Library`, `/Applications` (la carpeta en sí), `/System/Applications`, la carpeta
   personal en sí, `~/Library` en sí y sus subcarpetas estándar de primer nivel (Application
   Support, Containers, Caches, Preferences, …), `~/Documents`, `~/Desktop`, `~/Downloads` en sí,
-  cualquier ruta fuera de la carpeta personal salvo `.app` dentro de `/Applications`, apps
+  cualquier ruta fuera de la carpeta personal salvo `.app` dentro de `/Applications` o sus subcarpetas, y `~/Applications`, apps
   `com.apple.*`, y el bundle de la propia CleanMac.
 - **Rationale**: Doble barrera (UI + servicio) exigida por FR-017.
 

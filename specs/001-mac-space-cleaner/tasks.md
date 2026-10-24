@@ -62,12 +62,12 @@ description: "Task list for CleanMac implementation"
 
 ### Tests for User Story 1
 
-- [ ] T016 [P] [US1] Escribir tests de `DiskScanner` (umbral 1 MB y agregado "Otros", suma de tamaños, orden descendente, exclusiones, cancelación, `scanItem`) en `Tests/CleanMacCoreTests/DiskScannerTests.swift`
+- [ ] T016 [P] [US1] Escribir tests de `DiskScanner` (umbral 1 MB y agregado "Otros", suma de tamaños, orden descendente, exclusiones, cancelación, `scanItem`, archivos que desaparecen durante el escaneo) en `Tests/CleanMacCoreTests/DiskScannerTests.swift`
 
 ### Implementation for User Story 1
 
 - [ ] T017 [P] [US1] Implementar `VolumeInfoProvider` en `Sources/CleanMacCore/Scanning/VolumeInfoProvider.swift`
-- [ ] T018 [US1] Implementar `DiskScanner` (TaskGroup en primer nivel, progreso muestreado, cancelación cooperativa, exclusión de CloudStorage/Mobile Documents) en `Sources/CleanMacCore/Scanning/DiskScanner.swift` hasta que pase T016
+- [ ] T018 [US1] Implementar `DiskScanner` (TaskGroup en primer nivel, progreso muestreado, cancelación cooperativa, exclusión de CloudStorage/Mobile Documents, ignorar archivos que desaparecen) en `Sources/CleanMacCore/Scanning/DiskScanner.swift` hasta que pase T016
 - [ ] T019 [US1] Implementar `SpaceViewModel` (@MainActor @Observable: estado idle/scanning/done/cancelled, ruta de navegación, selección, borrado vía DeletionService y re-escaneo del padre) en `Sources/CleanMac/Space/SpaceViewModel.swift`
 - [ ] T020 [US1] Implementar `SpaceView` (barra de uso del volumen, botón Analizar/Cancelar con progreso, lista con barras de tamaño, navegación drill-down con breadcrumb, fila "Otros elementos pequeños", menú contextual "Mostrar en Finder", casillas y botón "Mover a la Papelera", aviso de ilegibles con enlace a Acceso Total al Disco) en `Sources/CleanMac/Space/SpaceView.swift`
 
@@ -121,7 +121,7 @@ description: "Task list for CleanMac implementation"
 ## Phase 6: Polish & Cross-Cutting Concerns
 
 - [ ] T032 [P] Escribir `README.md` (qué hace, build, tests, empaquetado, Acceso Total al Disco, garantías de seguridad)
-- [ ] T033 Auditar que la única llamada de borrado del código es `FileManager.trashItem` dentro de `DeletionService` (`grep` de `removeItem`, `unlink`, `rm `) y que toda acción de borrado de la UI pasa por `ConfirmationSheet`
+- [ ] T033 Auditar que la única llamada de borrado del código es `FileManager.trashItem` dentro de `DeletionService` (`grep` de `removeItem`, `unlink`, `rm `), que no hay red ni procesos externos (`URLSession`, `Process`) (FR-019) y que toda acción de borrado de la UI pasa por `ConfirmationSheet`
 - [ ] T034 Ejecutar puertas de calidad: `swift build` sin warnings, `scripts/test.sh` verde, `scripts/build-app.sh` genera la app
 - [ ] T035 Validar escenarios de quickstart.md (comparación ±5 % con `du` en una carpeta real, solo lectura)
 
