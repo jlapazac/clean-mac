@@ -20,6 +20,9 @@ final class SpaceViewModel {
     var pendingDeletion: [PendingDeletion]?
     private(set) var lastResult: DeletionResult?
     private(set) var isDeleting = false
+    private(set) var isMeasuringRestricted = false
+    private(set) var restrictedMessage: String?
+    private(set) var hasFullDiskAccess = SystemServices.hasFullDiskAccess
 
     let policy = SystemServices.makePolicy()
     private let deletionService = SystemServices.makeDeletionService()
@@ -57,6 +60,8 @@ final class SpaceViewModel {
                 }.value
                 try Task.checkCancellation()
                 summary = result
+                hasFullDiskAccess = SystemServices.hasFullDiskAccess
+                restrictedMessage = nil
                 path = path.filter { find($0) != nil }
                 state = .done
             } catch is CancellationError {
@@ -87,6 +92,52 @@ final class SpaceViewModel {
 
     var scannedSize: Int64 {
         summary?.roots.reduce(0) { $0 + $1.size } ?? 0
+    }
+
+    // MARK: Restricted folders
+
+    /// Folders still unmeasured because only an administrator can read them.
+    var pendingRestrictedPaths: [String] {
+        guard let summary else { return [] }
+        return summary.unreadablePaths.filter { path in
+            find(URL(fileURLWithPath: path, isDirectory: true))?.isPrivilegedMeasurement != true
+        }
+    }
+
+    /// Measures unreadable folders with `du` through the macOS authorization dialog (password or
+    /// Touch ID). Read-only: sizes only, the folders stay protected.
+    func measureRestricted() {
+        let paths = pendingRestrictedPaths
+        guard !paths.isEmpty else { return }
+        isMeasuringRestricted = true
+        restrictedMessage = nil
+        Task {
+            // Let the button's progress state render before the system dialog takes over.
+            try? await Task.sleep(for: .milliseconds(50))
+            do {
+                let output = try AppleScriptRunner.run(PrivilegedSizing.appleScript(for: paths))
+                let sizes = PrivilegedSizing.parse(output)
+                applyPrivilegedSizes(sizes)
+                let total = sizes.values.reduce(0, +)
+                restrictedMessage = "Medidas \(sizes.count) carpetas del sistema: \(ByteFormatting.string(total)). Siguen protegidas; no se pueden borrar desde CleanMac."
+            } catch {
+                restrictedMessage = error.localizedDescription
+            }
+            isMeasuringRestricted = false
+            refreshVolume()
+        }
+    }
+
+    private func applyPrivilegedSizes(_ sizes: [String: Int64]) {
+        guard var summary else { return }
+        for (path, size) in sizes {
+            let url = URL(fileURLWithPath: path, isDirectory: true)
+            guard var item = find(url) else { continue }
+            item.size = size
+            item.isPrivilegedMeasurement = true
+            summary.roots = summary.roots.map { Self.replacing(url, with: item, in: $0).item }
+            self.summary = summary
+        }
     }
 
     // MARK: Navigation

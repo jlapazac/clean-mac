@@ -41,6 +41,11 @@ Docker, .cache, Xcode DerivedData) y borrado seguro (siempre a la Papelera, con 
 - Q: ¿Debe el análisis cubrir más que la carpeta personal y Aplicaciones? → A: Sí, también
   `/Library`, `/opt`, `/usr/local` y `/private/var` en modo solo lectura, y mostrar el espacio usado
   que ninguna app puede leer (sistema macOS y datos protegidos).
+- Q: ¿Qué hacer con carpetas que solo puede leer root, aun con Acceso total al disco? → A: Ofrecer
+  "Medir con contraseña o Touch ID": `du` de solo lectura vía el diálogo de autorización del
+  sistema; las carpetas siguen protegidas.
+- Q: `NSWorkspace.recycle` no mostraba diálogo de autorización → A: El respaldo de borrado pasa a
+  ser Finder vía Apple Events, que sí solicita contraseña o Touch ID.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -158,8 +163,9 @@ el contenido está en la Papelera y que la carpeta raíz de la caché sigue exis
 - **FR-003**: Los usuarios MUST poder navegar dentro de cualquier ubicación para ver su desglose y
   volver atrás.
 - **FR-004**: El análisis MUST mostrar progreso, permitir cancelación y no bloquear la interfaz.
-- **FR-005**: La app MUST reportar el número de ubicaciones que no pudo leer y explicar cómo
-  conceder Acceso Total al Disco.
+- **FR-005**: La app MUST detectar si tiene Acceso Total al Disco y explicar cómo concederlo si
+  falta, y MUST listar las carpetas que solo puede leer un administrador ofreciendo medirlas con
+  autorización del sistema (contraseña o Touch ID), en modo solo lectura.
 - **FR-006**: Los usuarios MUST poder revelar cualquier elemento listado en Finder.
 - **FR-006a**: Los usuarios MUST poder marcar elementos del análisis y moverlos a la Papelera,
   sujeto a FR-015–FR-018; los elementos protegidos no pueden marcarse.
@@ -199,8 +205,8 @@ el contenido está en la Papelera y que la carpeta raíz de la caché sigue exis
 
 - **FR-015**: Toda eliminación MUST mover los elementos a la Papelera; ninguna MUST ser permanente.
 - **FR-015a**: Si macOS deniega el movimiento por permisos, la app MUST reintentar mediante el
-  mecanismo del Finder, que solicita autorización del sistema (contraseña o Touch ID); si aun así
-  falla, MUST indicar al usuario que active «Gestión de apps» para CleanMac.
+  Finder, que solicita autorización del sistema (contraseña o Touch ID); si aun así falla, MUST
+  indicar qué permiso falta («Gestión de apps» o «Automatización → Finder»).
 - **FR-016**: Toda eliminación MUST requerir una confirmación que muestre la lista de elementos y el
   tamaño total.
 - **FR-017**: La app MUST rechazar cualquier eliminación de rutas protegidas (rutas de sistema, la

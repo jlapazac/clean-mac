@@ -2,14 +2,21 @@ import AppKit
 import CleanMacCore
 
 /// Moves items to the Trash like Finder does. Tries the plain FileManager call first; if macOS
-/// denies it (items owned by root, protected app bundles), falls back to NSWorkspace, which shows
-/// the system's own authorization dialog. CleanMac never sees the password.
+/// denies it (e.g. apps installed by root), asks Finder to move the item, and Finder shows the
+/// system authorization dialog (password or Touch ID). CleanMac never sees the credential, and
+/// "Put Back" keeps working because Finder did the move.
 struct WorkspaceTrasher: Trasher {
     func trashItem(at url: URL) async throws {
         do {
             try await FileManagerTrasher().trashItem(at: url)
         } catch let error as NSError where Self.isPermissionError(error) {
-            _ = try await NSWorkspace.shared.recycle([url])
+            let path = AppleScriptRunner.escape(url.path)
+            _ = try await MainActor.run {
+                try AppleScriptRunner.run("tell application \"Finder\" to delete (POSIX file \"\(path)\")")
+            }
+            if FileManager.default.fileExists(atPath: url.path) {
+                throw AppleScriptError.failed("Finder no pudo moverlo a la Papelera")
+            }
         }
     }
 

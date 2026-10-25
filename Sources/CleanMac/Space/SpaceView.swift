@@ -16,8 +16,8 @@ struct SpaceView: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
-                if let summary = model.summary, summary.unreadableCount > 0 {
-                    UnreadableBanner(count: summary.unreadableCount)
+                if model.summary != nil {
+                    RestrictedBanner(model: model)
                 }
                 if let result = model.lastResult {
                     DeletionResultView(result: result)
@@ -164,7 +164,9 @@ private struct DiskItemRow: View {
                 HStack {
                     Text(item.name).lineLimit(1)
                     if item.isSkipped {
-                        Text("No analizado").font(.caption).foregroundStyle(.orange)
+                        Text(item.isPrivilegedMeasurement ? "Medido como administrador" : "No analizado")
+                            .font(.caption)
+                            .foregroundStyle(item.isPrivilegedMeasurement ? Color.secondary : Color.orange)
                     }
                     if protectionReason != nil {
                         Image(systemName: "lock.fill").font(.caption).foregroundStyle(.tertiary)
@@ -223,20 +225,40 @@ struct VolumeHeader: View {
     }
 }
 
-struct UnreadableBanner: View {
-    let count: Int
+struct RestrictedBanner: View {
+    let model: SpaceViewModel
 
     var body: some View {
-        HStack {
-            Image(systemName: "lock.shield").foregroundStyle(.orange)
-            // No vertical fixedSize here: during window min-size calculation SwiftUI proposes
-            // a near-zero width and the text would demand an enormous height.
-            Text("\(count) carpetas no se pudieron leer. Para analizarlas, concede Acceso total al disco a CleanMac.")
-                .lineLimit(2)
-            Spacer()
-            Button("Abrir Ajustes", action: SystemServices.openFullDiskAccessSettings)
+        let pending = model.pendingRestrictedPaths
+        VStack(alignment: .leading, spacing: 8) {
+            if !model.hasFullDiskAccess {
+                HStack {
+                    Image(systemName: "lock.shield").foregroundStyle(.orange)
+                    Text("CleanMac no tiene Acceso total al disco: no puede ver los datos de otras apps en tu Library.")
+                        .lineLimit(2)
+                    Spacer()
+                    Button("Abrir Ajustes", action: SystemServices.openFullDiskAccessSettings)
+                }
+            }
+            if !pending.isEmpty {
+                HStack {
+                    Image(systemName: "touchid").foregroundStyle(.orange)
+                    Text("\(pending.count) carpetas del sistema solo las puede leer un administrador.")
+                        .lineLimit(2)
+                    Spacer()
+                    if model.isMeasuringRestricted {
+                        ProgressView().controlSize(.small)
+                    }
+                    Button("Medir con contraseña o Touch ID", action: model.measureRestricted)
+                        .disabled(model.isMeasuringRestricted)
+                }
+            }
+            if let message = model.restrictedMessage {
+                Text(message).font(.callout).foregroundStyle(.secondary).lineLimit(3)
+            }
         }
-        .padding(10)
-        .background(.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+        .padding(model.hasFullDiskAccess && pending.isEmpty && model.restrictedMessage == nil ? 0 : 10)
+        .background(.orange.opacity(model.hasFullDiskAccess && pending.isEmpty ? 0 : 0.1),
+                    in: RoundedRectangle(cornerRadius: 8))
     }
 }

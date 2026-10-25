@@ -1,6 +1,9 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.1.0
+- Version change: 1.1.0 → 1.2.0 (anterior: 1.0.0 → 1.1.0)
+- 1.2.0: III. Nativo, Local y Privado — se permite una medición de solo lectura (`du`) con
+  privilegios de administrador, solo a petición explícita del usuario y mediante el diálogo de
+  autorización del sistema; la delegación de borrado de I pasa a hacerse vía Finder.
 - Modified principles:
   I. Seguridad del Usuario Primero — "MUST NOT solicitar privilegios de administrador" se redefine:
      la app sigue sin ejecutar sudo ni manejar credenciales, pero puede delegar en el diálogo de
@@ -28,8 +31,9 @@ Sync Impact Report
   Apple incluidas con macOS, la propia CleanMac y el directorio home en sí.
 - La app MUST NOT ejecutar `sudo`, elevar sus propios privilegios ni pedir, ver o guardar
   contraseñas. Cuando macOS exige autorización para mover un elemento a la Papelera (p. ej. apps
-  instaladas por root), la app MAY delegar en el diálogo de autorización del sistema (contraseña o
-  Touch ID), tal como hace Finder; el resultado sigue siendo mover a la Papelera.
+  instaladas por root), la app MAY pedir a Finder que lo mueva a la Papelera; Finder muestra el
+  diálogo de autorización del sistema (contraseña o Touch ID). El resultado sigue siendo mover a la
+  Papelera.
 - Ante duda sobre si un archivo pertenece a una app (coincidencia ambigua), la app MUST marcarlo
   como "posible resto" y dejarlo desmarcado por defecto.
 
@@ -55,6 +59,8 @@ Razón: el usuario quiere saber *qué* borrar; la decisión es suya y debe estar
 - La app MUST NOT ejecutar comandos de shell para borrar; los comandos externos de solo lectura
   (p. ej. consultar el uso de Docker) están permitidos únicamente si son opcionales y fallan con
   gracia cuando la herramienta no existe.
+- Medir carpetas que solo puede leer root MAY hacerse con `du` (solo lectura) mediante el diálogo de
+  autorización del sistema, únicamente cuando el usuario lo pide con un botón explícito.
 
 Razón: una app que lee todo el disco del usuario debe ser auditable y no sacar datos de la máquina.
 
@@ -117,4 +123,4 @@ Razón: es una herramienta personal; la complejidad extra no aporta valor.
 - El "Constitution Check" de cada plan MUST verificar los principios I–VI; cualquier violación MUST
   justificarse en la tabla de Complexity Tracking del plan.
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-24 | **Last Amended**: 2026-10-24
+**Version**: 1.2.0 | **Ratified**: 2026-10-24 | **Last Amended**: 2026-10-24

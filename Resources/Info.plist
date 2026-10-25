@@ -24,6 +24,8 @@
     <string>public.app-category.utilities</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>CleanMac pide a Finder mover a la Papelera los elementos que macOS protege; Finder solicitará tu contraseña o Touch ID.</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
 </dict>

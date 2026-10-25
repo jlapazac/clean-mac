@@ -12,6 +12,9 @@ public struct DiskItem: Sendable, Identifiable, Hashable {
     public var smallItemsCount: Int
     /// True when the folder was excluded (cloud storage) or could not be read.
     public var isSkipped: Bool
+    /// True when `size` was measured afterwards with administrator rights (read-only); the
+    /// folder's contents are still not browsable.
+    public var isPrivilegedMeasurement: Bool = false
 
     public var url: URL { id }
 
@@ -53,12 +56,16 @@ public struct ScanProgress: Sendable, Equatable {
 public struct ScanSummary: Sendable {
     public var roots: [DiskItem]
     public var unreadableCount: Int
+    /// Folders that could not be read (no permission), so they can be measured later.
+    public var unreadablePaths: [String]
     public var fileCount: Int
     public var duration: Duration
 
-    public init(roots: [DiskItem], unreadableCount: Int, fileCount: Int, duration: Duration) {
+    public init(roots: [DiskItem], unreadableCount: Int, unreadablePaths: [String] = [],
+                fileCount: Int, duration: Duration) {
         self.roots = roots
         self.unreadableCount = unreadableCount
+        self.unreadablePaths = unreadablePaths
         self.fileCount = fileCount
         self.duration = duration
     }

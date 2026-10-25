@@ -54,6 +54,9 @@ public struct DeletionService: Sendable {
 
     /// User-facing reason for a failed move, with a hint when macOS denied permission.
     static func describe(_ error: Error) -> String {
+        if let localized = error as? LocalizedError, let description = localized.errorDescription {
+            return description
+        }
         let nsError = error as NSError
         if nsError.domain == NSCocoaErrorDomain && nsError.code == CocoaError.userCancelled.rawValue {
             return "Cancelaste la autorización"
@@ -64,7 +67,7 @@ public struct DeletionService: Sendable {
             .contains(nsError.code) || posix == EPERM || posix == EACCES
         if denied {
             return "macOS no lo permitió. Si es una app, activa «Gestión de apps» para CleanMac en "
-                + "Ajustes del Sistema → Privacidad y seguridad, o autoriza con tu contraseña."
+                + "Ajustes del Sistema → Privacidad y seguridad."
         }
         return nsError.localizedDescription
     }

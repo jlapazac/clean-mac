@@ -48,7 +48,8 @@ public struct DiskScanner: Sendable {
         let snapshot = counter.snapshot()
         return ScanSummary(
             roots: nodes,
-            unreadableCount: snapshot.unreadable,
+            unreadableCount: snapshot.unreadable.count,
+            unreadablePaths: snapshot.unreadable.sorted(),
             fileCount: snapshot.progress.filesScanned,
             duration: ContinuousClock.now - start)
     }
@@ -123,7 +124,7 @@ public struct DiskScanner: Sendable {
         case .success(let entries):
             return entries
         case .failure(let error):
-            if error == .unreadable { counter.addUnreadable() }
+            if error == .unreadable { counter.addUnreadable(path) }
             return nil
         }
     }
@@ -182,7 +183,7 @@ private struct FolderBuilder {
 final class ScanCounter: @unchecked Sendable {
     private let lock = NSLock()
     private var progress = ScanProgress()
-    private var unreadable = 0
+    private var unreadable: [String] = []
     private var lastReport = ContinuousClock.now
     private let report: @Sendable (ScanProgress) -> Void
 
@@ -205,15 +206,15 @@ final class ScanCounter: @unchecked Sendable {
         if let toReport { report(toReport) }
     }
 
-    func addUnreadable() {
-        lock.withLock { unreadable += 1 }
+    func addUnreadable(_ path: String) {
+        lock.withLock { unreadable.append(path) }
     }
 
     func flush() {
         report(lock.withLock { progress })
     }
 
-    func snapshot() -> (progress: ScanProgress, unreadable: Int) {
+    func snapshot() -> (progress: ScanProgress, unreadable: [String]) {
         lock.withLock { (progress, unreadable) }
     }
 }
