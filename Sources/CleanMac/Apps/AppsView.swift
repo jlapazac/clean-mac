@@ -5,7 +5,7 @@ struct AppsView: View {
     @Bindable var model: AppsViewModel
 
     var body: some View {
-        HSplitView {
+        HStack(spacing: 0) {
             VStack(spacing: 0) {
                 HStack {
                     TextField("Buscar apps", text: $model.search)
@@ -38,7 +38,9 @@ struct AppsView: View {
                     .padding(6)
                 }
             }
-            .frame(minWidth: 340, idealWidth: 400)
+            .frame(width: 380)
+
+            Divider()
 
             Group {
                 if let app = model.selectedApp {
@@ -53,7 +55,7 @@ struct AppsView: View {
                     .padding()
                 }
             }
-            .frame(minWidth: 420, maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationTitle("Aplicaciones")
         .onAppear(perform: model.loadIfNeeded)
@@ -90,7 +92,7 @@ private struct AppRow: View {
                             .help("En ejecución")
                     }
                 }
-                Text("App \(ByteFormatting.string(app.bundleSize)) · Restos \(isMeasuring ? "…" : ByteFormatting.string(app.leftoversSize))")
+                Text(detail)
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
@@ -99,5 +101,14 @@ private struct AppRow: View {
                 .fontWeight(.medium)
         }
         .opacity(app.isAppleApp ? 0.6 : 1)
+    }
+
+    private var detail: String {
+        var text = "App \(ByteFormatting.string(app.bundleSize)) · Restos "
+        text += isMeasuring ? "…" : ByteFormatting.string(app.leftoversSize)
+        if !isMeasuring && app.possibleLeftoversSize > 0 {
+            text += " · Posibles \(ByteFormatting.string(app.possibleLeftoversSize))"
+        }
+        return text
     }
 }

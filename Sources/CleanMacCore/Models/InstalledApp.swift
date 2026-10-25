@@ -14,7 +14,14 @@ public struct InstalledApp: Sendable, Identifiable, Hashable {
     public var leftovers: [Leftover]
 
     public var url: URL { id }
-    public var leftoversSize: Int64 { leftovers.reduce(0) { $0 + $1.size } }
+    /// Only high-confidence leftovers count towards the app's size; ambiguous matches may
+    /// belong to another app (e.g. two apps from the same vendor).
+    public var leftoversSize: Int64 {
+        leftovers.filter { $0.confidence == .high }.reduce(0) { $0 + $1.size }
+    }
+    public var possibleLeftoversSize: Int64 {
+        leftovers.filter { $0.confidence == .ambiguous }.reduce(0) { $0 + $1.size }
+    }
     public var totalSize: Int64 { bundleSize + leftoversSize }
     public var canUninstall: Bool { !isAppleApp && !isRunning && !isSelf }
 

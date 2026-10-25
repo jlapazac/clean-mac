@@ -45,3 +45,19 @@ import Testing
         #expect(apps.isEmpty)
     }
 }
+
+@Suite struct InstalledAppSizeTests {
+    @Test func onlyHighConfidenceLeftoversCountTowardsTotal() {
+        let base = URL(fileURLWithPath: "/tmp/x")
+        let app = InstalledApp(
+            url: base.appendingPathComponent("A.app"), name: "A", bundleIdentifier: "com.a.app",
+            version: nil, bundleSize: 100, isAppleApp: false,
+            leftovers: [
+                Leftover(url: base.appendingPathComponent("1"), kind: .caches, size: 10, confidence: .high, reason: "r"),
+                Leftover(url: base.appendingPathComponent("2"), kind: .caches, size: 1_000, confidence: .ambiguous, reason: "r"),
+            ])
+        #expect(app.leftoversSize == 10)
+        #expect(app.possibleLeftoversSize == 1_000)
+        #expect(app.totalSize == 110)
+    }
+}

@@ -34,12 +34,17 @@ struct ContentView: View {
             }
             .navigationSplitViewColumnWidth(min: 170, ideal: 190)
         } detail: {
-            switch section ?? .space {
-            case .space: SpaceView(model: space)
-            case .apps: AppsView(model: apps)
-            case .cleanup: CleanupView(model: cleanup)
+            // Fill the column and pin content to the top; otherwise a long list's ideal height
+            // grows the whole split view past the window and pushes everything out of sight.
+            Group {
+                switch section ?? .space {
+                case .space: SpaceView(model: space)
+                case .apps: AppsView(model: apps)
+                case .cleanup: CleanupView(model: cleanup)
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
-        .frame(minWidth: 900, minHeight: 600)
+        .frame(minWidth: 900, maxWidth: .infinity, minHeight: 600, maxHeight: .infinity)
     }
 }

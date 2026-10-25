@@ -13,5 +13,6 @@ struct CleanMacApp: App {
             ContentView()
                 .onAppear { NSApplication.shared.activate() }
         }
+        .defaultSize(width: 1100, height: 760)
     }
 }

@@ -21,8 +21,10 @@ struct SpaceView: View {
 
             Divider()
             content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             if model.summary != nil { footer }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationTitle("Espacio")
         .sheet(item: Binding(
             get: { model.pendingDeletion.map(PendingBatch.init) },
@@ -220,8 +222,10 @@ struct UnreadableBanner: View {
     var body: some View {
         HStack {
             Image(systemName: "lock.shield").foregroundStyle(.orange)
+            // No vertical fixedSize here: during window min-size calculation SwiftUI proposes
+            // a near-zero width and the text would demand an enormous height.
             Text("\(count) carpetas no se pudieron leer. Para analizarlas, concede Acceso total al disco a CleanMac.")
-                .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(2)
             Spacer()
             Button("Abrir Ajustes", action: SystemServices.openFullDiskAccessSettings)
         }

@@ -44,7 +44,7 @@ struct AppDetailView: View {
                             isAmbiguous: leftover.confidence == .ambiguous)
                     }
                 } header: {
-                    Text("Restos en ~/Library (\(ByteFormatting.string(app.leftoversSize)))")
+                    Text("Restos en ~/Library (\(ByteFormatting.string(app.leftoversSize + app.possibleLeftoversSize)))")
                 }
             }
             Divider()
