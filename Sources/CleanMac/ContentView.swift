@@ -25,6 +25,7 @@ struct ContentView: View {
     @State private var section: SidebarSection? = .space
     @State private var space = SpaceViewModel()
     @State private var apps = AppsViewModel()
+    @State private var cleanup = CleanupViewModel()
 
     var body: some View {
         NavigationSplitView {
@@ -36,7 +37,7 @@ struct ContentView: View {
             switch section ?? .space {
             case .space: SpaceView(model: space)
             case .apps: AppsView(model: apps)
-            case .cleanup: Text("Limpieza")
+            case .cleanup: CleanupView(model: cleanup)
             }
         }
         .frame(minWidth: 900, minHeight: 600)

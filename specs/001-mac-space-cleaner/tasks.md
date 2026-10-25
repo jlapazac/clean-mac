@@ -106,13 +106,13 @@ description: "Task list for CleanMac implementation"
 
 ### Tests for User Story 3
 
-- [ ] T028 [P] [US3] Escribir tests de `CleanupCatalog` (categorías de research §R7 relativas a un home falso, `measure`, `exists=false` si falta, `itemsToClean` devuelve hijos y nunca la raíz, Docker devuelve `[]`) en `Tests/CleanMacCoreTests/CleanupCatalogTests.swift`
+- [X] T028 [P] [US3] Escribir tests de `CleanupCatalog` (categorías de research §R7 relativas a un home falso, `measure`, `exists=false` si falta, `itemsToClean` devuelve hijos y nunca la raíz, Docker devuelve `[]`) en `Tests/CleanMacCoreTests/CleanupCatalogTests.swift`
 
 ### Implementation for User Story 3
 
-- [ ] T029 [US3] Implementar `CleanupCatalog` en `Sources/CleanMacCore/Cleanup/CleanupCatalog.swift` hasta que pase T028
-- [ ] T030 [US3] Implementar `CleanupViewModel` (medición en paralelo, selección, limpieza vía DeletionService, re-medición) en `Sources/CleanMac/Cleanup/CleanupViewModel.swift`
-- [ ] T031 [US3] Implementar `CleanupView` (tarjetas con tamaño, descripción y riesgo; Docker con instrucciones y sin casilla; categorías inexistentes como "No encontrada"; total seleccionado; confirmación y resultado) en `Sources/CleanMac/Cleanup/CleanupView.swift`
+- [X] T029 [US3] Implementar `CleanupCatalog` en `Sources/CleanMacCore/Cleanup/CleanupCatalog.swift` hasta que pase T028
+- [X] T030 [US3] Implementar `CleanupViewModel` (medición en paralelo, selección, limpieza vía DeletionService, re-medición) en `Sources/CleanMac/Cleanup/CleanupViewModel.swift`
+- [X] T031 [US3] Implementar `CleanupView` (tarjetas con tamaño, descripción y riesgo; Docker con instrucciones y sin casilla; categorías inexistentes como "No encontrada"; total seleccionado; confirmación y resultado) en `Sources/CleanMac/Cleanup/CleanupView.swift`
 
 **Checkpoint**: Las tres historias funcionan
 
