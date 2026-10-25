@@ -25,9 +25,9 @@ description: "Task list for CleanMac implementation"
 
 **Purpose**: Inicialización del paquete SwiftPM y scripts
 
-- [ ] T001 Crear `Package.swift` con targets `CleanMacCore` (library), `CleanMac` (executable, depende de CleanMacCore) y `CleanMacCoreTests`, plataforma macOS 14, Swift 6
-- [ ] T002 [P] Crear `scripts/test.sh` que ejecuta `swift test` con las rutas `-F`/`-rpath` de Testing.framework de Command Line Tools (research.md §R1)
-- [ ] T003 [P] Crear `Resources/Info.plist` (bundle ID `dev.cleanmac.CleanMac`, `LSMinimumSystemVersion` 14.0) y `scripts/build-app.sh` que genera y firma ad hoc `dist/CleanMac.app` (research.md §R9)
+- [X] T001 Crear `Package.swift` con targets `CleanMacCore` (library), `CleanMac` (executable, depende de CleanMacCore) y `CleanMacCoreTests`, plataforma macOS 14, Swift 6
+- [X] T002 [P] Crear `scripts/test.sh` que ejecuta `swift test` con las rutas `-F`/`-rpath` de Testing.framework de Command Line Tools (research.md §R1)
+- [X] T003 [P] Crear `Resources/Info.plist` (bundle ID `dev.cleanmac.CleanMac`, `LSMinimumSystemVersion` 14.0) y `scripts/build-app.sh` que genera y firma ad hoc `dist/CleanMac.app` (research.md §R9)
 
 ---
 
@@ -37,18 +37,18 @@ description: "Task list for CleanMac implementation"
 
 **⚠️ CRITICAL**: Ninguna historia empieza hasta completar esta fase
 
-- [ ] T004 [P] Crear modelos en `Sources/CleanMacCore/Models/` (`DiskItem.swift`, `VolumeInfo.swift`, `InstalledApp.swift`, `Leftover.swift`, `CleanupCategory.swift`, `DeletionResult.swift`) según data-model.md
-- [ ] T005 [P] Implementar `ByteFormatting` en `Sources/CleanMacCore/Support/ByteFormatting.swift`
-- [ ] T006 [P] Crear helpers de fixtures (directorio temporal, crear archivos de N bytes) en `Tests/CleanMacCoreTests/TestFixtures.swift`
-- [ ] T007 [P] Escribir tests de `ProtectionPolicy` (rutas de sistema, home y Library en sí, subcarpetas estándar de Library, fuera de home, apps com.apple, bundle propio, rutas válidas permitidas) en `Tests/CleanMacCoreTests/ProtectionPolicyTests.swift`
-- [ ] T008 [P] Escribir tests de `DeletionService` con un `Trasher` falso (nunca llama al trasher con rutas protegidas, reporta fallos, suma bytes liberados, continúa tras un error) en `Tests/CleanMacCoreTests/DeletionServiceTests.swift`
-- [ ] T009 [P] Escribir tests de `SizeCalculator` (suma recursiva, no sigue symlinks, cuenta ilegibles) en `Tests/CleanMacCoreTests/SizeCalculatorTests.swift`
-- [ ] T010 Implementar `ProtectionPolicy` en `Sources/CleanMacCore/Safety/ProtectionPolicy.swift` hasta que pase T007
-- [ ] T011 Implementar `SizeCalculator` en `Sources/CleanMacCore/Scanning/SizeCalculator.swift` hasta que pase T009
-- [ ] T012 Implementar `Trasher`, `FileManagerTrasher` y `DeletionService` en `Sources/CleanMacCore/Safety/DeletionService.swift` hasta que pase T008 (depende de T010, T011)
-- [ ] T013 [P] Crear `ConfirmationSheet` (lista de rutas, total, botón "Mover a la Papelera") en `Sources/CleanMac/Shared/ConfirmationSheet.swift` y `SizeLabel` en `Sources/CleanMac/Shared/SizeLabel.swift`
-- [ ] T014 [P] Crear `SystemServices` (revelar en Finder, icono de app, apps en ejecución vía NSWorkspace) en `Sources/CleanMac/Shared/SystemServices.swift`
-- [ ] T015 Crear `CleanMacApp.swift` y `ContentView.swift` (NavigationSplitView con secciones Espacio, Aplicaciones, Limpieza) en `Sources/CleanMac/`
+- [X] T004 [P] Crear modelos en `Sources/CleanMacCore/Models/` (`DiskItem.swift`, `VolumeInfo.swift`, `InstalledApp.swift`, `Leftover.swift`, `CleanupCategory.swift`, `DeletionResult.swift`) según data-model.md
+- [X] T005 [P] Implementar `ByteFormatting` en `Sources/CleanMacCore/Support/ByteFormatting.swift`
+- [X] T006 [P] Crear helpers de fixtures (directorio temporal, crear archivos de N bytes) en `Tests/CleanMacCoreTests/TestFixtures.swift`
+- [X] T007 [P] Escribir tests de `ProtectionPolicy` (rutas de sistema, home y Library en sí, subcarpetas estándar de Library, fuera de home, apps com.apple, bundle propio, rutas válidas permitidas) en `Tests/CleanMacCoreTests/ProtectionPolicyTests.swift`
+- [X] T008 [P] Escribir tests de `DeletionService` con un `Trasher` falso (nunca llama al trasher con rutas protegidas, reporta fallos, suma bytes liberados, continúa tras un error) en `Tests/CleanMacCoreTests/DeletionServiceTests.swift`
+- [X] T009 [P] Escribir tests de `SizeCalculator` (suma recursiva, no sigue symlinks, cuenta ilegibles) en `Tests/CleanMacCoreTests/SizeCalculatorTests.swift`
+- [X] T010 Implementar `ProtectionPolicy` en `Sources/CleanMacCore/Safety/ProtectionPolicy.swift` hasta que pase T007
+- [X] T011 Implementar `SizeCalculator` en `Sources/CleanMacCore/Scanning/SizeCalculator.swift` hasta que pase T009
+- [X] T012 Implementar `Trasher`, `FileManagerTrasher` y `DeletionService` en `Sources/CleanMacCore/Safety/DeletionService.swift` hasta que pase T008 (depende de T010, T011)
+- [X] T013 [P] Crear `ConfirmationSheet` (lista de rutas, total, botón "Mover a la Papelera") en `Sources/CleanMac/Shared/ConfirmationSheet.swift` y `SizeLabel` en `Sources/CleanMac/Shared/SizeLabel.swift`
+- [X] T014 [P] Crear `SystemServices` (revelar en Finder, icono de app, apps en ejecución vía NSWorkspace) en `Sources/CleanMac/Shared/SystemServices.swift`
+- [X] T015 Crear `CleanMacApp.swift` y `ContentView.swift` (NavigationSplitView con secciones Espacio, Aplicaciones, Limpieza) en `Sources/CleanMac/`
 
 **Checkpoint**: `swift build` y `scripts/test.sh` en verde; la app abre con tres secciones vacías
 
