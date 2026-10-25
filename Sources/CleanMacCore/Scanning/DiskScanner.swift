@@ -1,8 +1,8 @@
 import Foundation
 
 /// Builds a size tree of one or more folders. Only children at or above `minimumItemSize`
-/// are kept as nodes, which keeps the tree small even for millions of files. The first two
-/// levels are scanned concurrently; the scan honours task cancellation.
+/// are kept as nodes, which keeps the tree small even for millions of files. The first levels
+/// are scanned concurrently; the scan honours task cancellation.
 public struct DiskScanner: Sendable {
     public let minimumItemSize: Int64
     public let excludedPaths: [URL]
@@ -35,9 +35,10 @@ public struct DiskScanner: Sendable {
         try Task.checkCancellation()
         let start = ContinuousClock.now
         let counter = ScanCounter(report: progress)
-        let nodes = try await withThrowingTaskGroup(of: (Int, DiskItem).self) { group in
+        let nodes = try await withThrowingTaskGroup(of: (Int, DiskItem?).self) { group in
             for (index, root) in roots.enumerated() {
-                group.addTask { (index, try await node(at: root, depth: 0, counter: counter)) }
+                let path = ProtectionPolicy.normalize(root)
+                group.addTask { (index, try await node(at: path, depth: 0, counter: counter)) }
             }
             var result = [DiskItem?](repeating: nil, count: roots.count)
             for try await (index, item) in group { result[index] = item }
@@ -53,86 +54,127 @@ public struct DiskScanner: Sendable {
     }
 
     public func scanItem(at url: URL) async throws -> DiskItem {
-        try await node(at: url, depth: 0, counter: ScanCounter(report: { _ in }))
+        let path = ProtectionPolicy.normalize(url)
+        let counter = ScanCounter(report: { _ in })
+        return try await node(at: path, depth: 0, counter: counter)
+            ?? DiskItem(url: URL(fileURLWithPath: path), size: 0, isDirectory: false, isSkipped: true)
     }
 
     // MARK: - Tree building
 
-    private static let keys: Set<URLResourceKey> = [
-        .isDirectoryKey, .isSymbolicLinkKey, .totalFileAllocatedSizeKey, .fileAllocatedSizeKey,
-    ]
-
-    private func node(at url: URL, depth: Int, counter: ScanCounter) async throws -> DiskItem {
+    /// Node for `path`, or nil if it vanished.
+    private func node(at path: String, depth: Int, counter: ScanCounter) async throws -> DiskItem? {
         try Task.checkCancellation()
-        guard let values = try? url.resourceValues(forKeys: Self.keys) else {
-            return DiskItem(url: url, size: 0, isDirectory: false, isSkipped: true)
+        guard let info = POSIXDirectory.stat(path: path) else { return nil }
+        guard info.kind == .directory else {
+            counter.addFile(size: info.allocated, path: path)
+            return item(path, size: info.allocated, isDirectory: false)
         }
-        if values.isDirectory != true || values.isSymbolicLink == true {
-            let size = SizeCalculator.allocatedSize(values)
-            counter.addFile(size: size, path: url.path)
-            return DiskItem(url: url, size: size, isDirectory: false)
+        guard depth < Self.parallelDepth else {
+            return try directoryNode(at: path, counter: counter)
         }
-        if isExcluded(url) {
-            return DiskItem(url: url, size: 0, isDirectory: true, isSkipped: true)
-        }
-        guard let children = listChildren(of: url, counter: counter) else {
-            return DiskItem(url: url, size: 0, isDirectory: true, isSkipped: true)
+        guard let entries = try listing(of: path, counter: counter) else {
+            return item(path, size: 0, isDirectory: true, skipped: true)
         }
 
-        var childNodes: [DiskItem] = []
-        if depth < Self.parallelDepth {
-            childNodes = try await withThrowingTaskGroup(of: DiskItem.self) { group in
-                for child in children {
-                    group.addTask { try await node(at: child, depth: depth + 1, counter: counter) }
-                }
-                var collected: [DiskItem] = []
-                for try await item in group { collected.append(item) }
-                return collected
-            }
-        } else {
-            childNodes.reserveCapacity(children.count)
-            for child in children {
-                childNodes.append(try await node(at: child, depth: depth + 1, counter: counter))
-            }
+        var builder = FolderBuilder(minimumItemSize: minimumItemSize)
+        let folders = entries.filter { $0.kind == .directory }
+        for entry in entries where entry.kind != .directory {
+            let child = POSIXDirectory.join(path, entry.name)
+            counter.addFile(size: entry.allocated, path: child)
+            builder.add(file: child, size: entry.allocated)
         }
-        return fold(url: url, children: childNodes)
+        let children = try await withThrowingTaskGroup(of: DiskItem?.self) { group in
+            for entry in folders {
+                let child = POSIXDirectory.join(path, entry.name)
+                group.addTask { try await node(at: child, depth: depth + 1, counter: counter) }
+            }
+            var collected: [DiskItem] = []
+            for try await child in group { if let child { collected.append(child) } }
+            return collected
+        }
+        children.forEach { builder.add($0) }
+        return builder.build(url: URL(fileURLWithPath: path, isDirectory: true))
     }
 
-    private func fold(url: URL, children: [DiskItem]) -> DiskItem {
-        var kept: [DiskItem] = []
-        var smallSize: Int64 = 0
-        var smallCount = 0
-        var total: Int64 = 0
-        for child in children {
-            // Vanished files are dropped; skipped folders are kept so the user sees they were
-            // not analysed.
-            if child.isSkipped && !child.isDirectory { continue }
-            total += child.size
-            if child.size >= minimumItemSize || child.isSkipped {
-                kept.append(child)
+    /// Synchronous recursion used below the parallel levels.
+    private func directoryNode(at path: String, counter: ScanCounter) throws -> DiskItem {
+        guard let entries = try listing(of: path, counter: counter) else {
+            return item(path, size: 0, isDirectory: true, skipped: true)
+        }
+        var builder = FolderBuilder(minimumItemSize: minimumItemSize)
+        for entry in entries {
+            let child = POSIXDirectory.join(path, entry.name)
+            if entry.kind == .directory {
+                builder.add(try directoryNode(at: child, counter: counter))
             } else {
-                smallSize += child.size
-                smallCount += 1
+                counter.addFile(size: entry.allocated, path: child)
+                builder.add(file: child, size: entry.allocated)
             }
         }
-        kept.sort { $0.size != $1.size ? $0.size > $1.size : $0.name < $1.name }
-        return DiskItem(
-            url: url, size: total, isDirectory: true, children: kept,
-            smallItemsSize: smallSize, smallItemsCount: smallCount)
+        return builder.build(url: URL(fileURLWithPath: path, isDirectory: true))
     }
 
-    private func listChildren(of url: URL, counter: ScanCounter) -> [URL]? {
-        do {
-            return try FileManager.default.contentsOfDirectory(
-                at: url, includingPropertiesForKeys: Array(Self.keys), options: [])
-        } catch {
-            counter.addUnreadable()
+    /// Entries of a folder, or nil when it is excluded or unreadable.
+    private func listing(of path: String, counter: ScanCounter) throws -> [POSIXDirectory.Entry]? {
+        try Task.checkCancellation()
+        if excludedSet.contains(path) { return nil }
+        switch POSIXDirectory.entries(of: path) {
+        case .success(let entries):
+            return entries
+        case .failure(let error):
+            if error == .unreadable { counter.addUnreadable() }
             return nil
         }
     }
 
-    private func isExcluded(_ url: URL) -> Bool {
-        !excludedSet.isEmpty && excludedSet.contains(ProtectionPolicy.normalize(url))
+    private func item(_ path: String, size: Int64, isDirectory: Bool, skipped: Bool = false) -> DiskItem {
+        DiskItem(url: URL(fileURLWithPath: path, isDirectory: isDirectory),
+                 name: (path as NSString).lastPathComponent,
+                 size: size, isDirectory: isDirectory, isSkipped: skipped)
+    }
+}
+
+/// Accumulates a folder's children, keeping large ones as nodes and folding small ones.
+private struct FolderBuilder {
+    let minimumItemSize: Int64
+    var kept: [DiskItem] = []
+    var smallSize: Int64 = 0
+    var smallCount = 0
+    var total: Int64 = 0
+
+    init(minimumItemSize: Int64) {
+        self.minimumItemSize = minimumItemSize
+    }
+
+    /// Files only become nodes when large, so small files never allocate a URL.
+    mutating func add(file path: String, size: Int64) {
+        total += size
+        if size >= minimumItemSize {
+            kept.append(DiskItem(url: URL(fileURLWithPath: path, isDirectory: false),
+                                 name: (path as NSString).lastPathComponent,
+                                 size: size, isDirectory: false))
+        } else {
+            smallSize += size
+            smallCount += 1
+        }
+    }
+
+    /// Skipped folders are kept regardless of size so the user sees they were not analysed.
+    mutating func add(_ child: DiskItem) {
+        total += child.size
+        if child.size >= minimumItemSize || child.isSkipped {
+            kept.append(child)
+        } else {
+            smallSize += child.size
+            smallCount += 1
+        }
+    }
+
+    func build(url: URL) -> DiskItem {
+        let sorted = kept.sorted { $0.size != $1.size ? $0.size > $1.size : $0.name < $1.name }
+        return DiskItem(url: url, name: url.lastPathComponent, size: total, isDirectory: true,
+                        children: sorted, smallItemsSize: smallSize, smallItemsCount: smallCount)
     }
 }
 

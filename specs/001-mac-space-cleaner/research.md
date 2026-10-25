@@ -13,14 +13,14 @@
 
 ## R2. Cálculo de tamaño en disco
 
-- **Decision**: `FileManager.enumerator(at:includingPropertiesForKeys:options:errorHandler:)` con
-  claves `.totalFileAllocatedSizeKey` (fallback `.fileAllocatedSizeKey`), `.isDirectoryKey`,
-  `.isSymbolicLinkKey`; sin seguir enlaces simbólicos; el `errorHandler` cuenta errores y devuelve
-  `true` para continuar.
-- **Rationale**: El tamaño asignado coincide con `du` (SC-002) y refleja correctamente archivos
-  dispersos como `Docker.raw`. El handler permite omitir errores de permisos (principio V).
-- **Alternatives**: `fts`/`getattrlist` en C (más rápido pero más complejo, innecesario de inicio);
-  `fileSizeKey` (tamaño lógico; sobreestima archivos dispersos).
+- **Decision**: Recorrido con `opendir`/`readdir` + `fstatat(AT_SYMLINK_NOFOLLOW)` (las mismas
+  llamadas que `du`); tamaño = `st_blocks * 512`; no se siguen enlaces simbólicos; carpetas
+  ilegibles se cuentan y se omiten. Solo se crean `URL` para los nodos que se conservan.
+- **Rationale**: La primera versión con `FileManager` + `URLResourceValues` tardaba 166 s en
+  1,22 M archivos (≈ 4× `du`, 44 s), incumpliendo SC-001. Con POSIX baja a 74 s. El tamaño
+  asignado coincide con `du` (±0,2 % medido en `~/Library/Containers`, exacto en `/Applications`).
+- **Alternatives**: `FileManager.enumerator` con `totalFileAllocatedSizeKey` (medido: demasiado
+  lento); `fileSizeKey` (tamaño lógico; sobreestima archivos dispersos como `Docker.raw`).
 - **Nota**: Los hard links pueden contarse dos veces; es raro en la carpeta personal y se acepta.
 
 ## R3. Árbol de análisis acotado en memoria

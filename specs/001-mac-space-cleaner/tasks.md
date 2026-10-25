@@ -120,10 +120,10 @@ description: "Task list for CleanMac implementation"
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T032 [P] Escribir `README.md` (qué hace, build, tests, empaquetado, Acceso Total al Disco, garantías de seguridad)
-- [ ] T033 Auditar que la única llamada de borrado del código es `FileManager.trashItem` dentro de `DeletionService` (`grep` de `removeItem`, `unlink`, `rm `), que no hay red ni procesos externos (`URLSession`, `Process`) (FR-019) y que toda acción de borrado de la UI pasa por `ConfirmationSheet`
-- [ ] T034 Ejecutar puertas de calidad: `swift build` sin warnings, `scripts/test.sh` verde, `scripts/build-app.sh` genera la app
-- [ ] T035 Validar escenarios de quickstart.md (comparación ±5 % con `du` en una carpeta real, solo lectura)
+- [X] T032 [P] Escribir `README.md` (qué hace, build, tests, empaquetado, Acceso Total al Disco, garantías de seguridad)
+- [X] T033 Auditar que la única llamada de borrado del código es `FileManager.trashItem` dentro de `DeletionService` (`grep` de `removeItem`, `unlink`, `rm `), que no hay red ni procesos externos (`URLSession`, `Process`) (FR-019) y que toda acción de borrado de la UI pasa por `ConfirmationSheet`
+- [X] T034 Ejecutar puertas de calidad: `swift build` sin warnings, `scripts/test.sh` verde, `scripts/build-app.sh` genera la app
+- [X] T035 Validar escenarios de quickstart.md (comparación ±5 % con `du` en una carpeta real, solo lectura)
 
 ---
 
