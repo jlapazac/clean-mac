@@ -1,20 +1,15 @@
 <!--
 Sync Impact Report
-- Version change: (template, unversioned) → 1.0.0
-- Modified principles: N/A (initial ratification)
-- Added principles:
-  I. Seguridad del Usuario Primero (NO NEGOCIABLE)
-  II. Transparencia Total
-  III. Nativo, Local y Privado
-  IV. Núcleo Testeable Separado de la UI
-  V. Respuesta y Rendimiento
-  VI. Simplicidad
-- Added sections: Restricciones Técnicas; Flujo de Desarrollo y Puertas de Calidad; Governance
+- Version change: 1.0.0 → 1.1.0
+- Modified principles:
+  I. Seguridad del Usuario Primero — "MUST NOT solicitar privilegios de administrador" se redefine:
+     la app sigue sin ejecutar sudo ni manejar credenciales, pero puede delegar en el diálogo de
+     autorización del sistema (contraseña o Touch ID) cuando macOS lo exige para mover algo a la
+     Papelera (p. ej. apps instaladas por root).
+- Added sections: none
 - Removed sections: none
-- Templates requiring updates:
-  ✅ .specify/templates/plan-template.md — "Constitution Check" lee este archivo en runtime; sin cambios
-  ✅ .specify/templates/spec-template.md — sin secciones obligatorias nuevas
-  ✅ .specify/templates/tasks-template.md — tareas de tests ya contempladas
+- Rationale: 17 apps del usuario pertenecen a root y no se podían desinstalar; el usuario pidió
+  explícitamente usar la credencial o la huella como otras apps (2026-10-24).
 - Follow-up TODOs: none
 -->
 
@@ -31,7 +26,10 @@ Sync Impact Report
 - La app MUST mantener una lista de rutas protegidas que nunca se pueden seleccionar ni borrar:
   `/System`, `/usr`, `/bin`, `/sbin`, `/private`, `/Library` (raíz del sistema), las apps de
   Apple incluidas con macOS, la propia CleanMac y el directorio home en sí.
-- La app MUST NOT solicitar privilegios de administrador ni ejecutar `sudo`.
+- La app MUST NOT ejecutar `sudo`, elevar sus propios privilegios ni pedir, ver o guardar
+  contraseñas. Cuando macOS exige autorización para mover un elemento a la Papelera (p. ej. apps
+  instaladas por root), la app MAY delegar en el diálogo de autorización del sistema (contraseña o
+  Touch ID), tal como hace Finder; el resultado sigue siendo mover a la Papelera.
 - Ante duda sobre si un archivo pertenece a una app (coincidencia ambigua), la app MUST marcarlo
   como "posible resto" y dejarlo desmarcado por defecto.
 
@@ -119,4 +117,4 @@ Razón: es una herramienta personal; la complejidad extra no aporta valor.
 - El "Constitution Check" de cada plan MUST verificar los principios I–VI; cualquier violación MUST
   justificarse en la tabla de Complexity Tracking del plan.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-24 | **Last Amended**: 2026-10-24
+**Version**: 1.1.0 | **Ratified**: 2026-10-24 | **Last Amended**: 2026-10-24

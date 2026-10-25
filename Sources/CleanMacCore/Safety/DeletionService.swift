@@ -2,13 +2,13 @@ import Foundation
 
 /// Moves an item to the Trash. Abstracted so tests never touch the real Trash.
 public protocol Trasher: Sendable {
-    func trashItem(at url: URL) throws
+    func trashItem(at url: URL) async throws
 }
 
 public struct FileManagerTrasher: Trasher {
     public init() {}
 
-    public func trashItem(at url: URL) throws {
+    public func trashItem(at url: URL) async throws {
         try FileManager.default.trashItem(at: url, resultingItemURL: nil)
     }
 }
@@ -42,14 +42,31 @@ public struct DeletionService: Sendable {
             }
             let size = SizeCalculator.allocatedSize(of: url).size
             do {
-                try trasher.trashItem(at: url)
+                try await trasher.trashItem(at: url)
                 result.trashed.append(url)
                 result.bytesFreed += size
             } catch {
-                result.failures.append(DeletionFailure(url: url, reason: error.localizedDescription))
+                result.failures.append(DeletionFailure(url: url, reason: Self.describe(error)))
             }
         }
         return result
+    }
+
+    /// User-facing reason for a failed move, with a hint when macOS denied permission.
+    static func describe(_ error: Error) -> String {
+        let nsError = error as NSError
+        if nsError.domain == NSCocoaErrorDomain && nsError.code == CocoaError.userCancelled.rawValue {
+            return "Cancelaste la autorización"
+        }
+        let posix = (nsError.userInfo[NSUnderlyingErrorKey] as? NSError)
+            .flatMap { $0.domain == NSPOSIXErrorDomain ? Int32($0.code) : nil }
+        let denied = [CocoaError.fileWriteNoPermission.rawValue, CocoaError.fileReadNoPermission.rawValue]
+            .contains(nsError.code) || posix == EPERM || posix == EACCES
+        if denied {
+            return "macOS no lo permitió. Si es una app, activa «Gestión de apps» para CleanMac en "
+                + "Ajustes del Sistema → Privacidad y seguridad, o autoriza con tu contraseña."
+        }
+        return nsError.localizedDescription
     }
 
     /// Drops duplicates and items whose ancestor is also in the list, keeping the input order.

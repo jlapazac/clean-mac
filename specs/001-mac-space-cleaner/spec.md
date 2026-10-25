@@ -33,6 +33,15 @@ Docker, .cache, Xcode DerivedData) y borrado seguro (siempre a la Papelera, con 
   de empaquetado local, para que el usuario pueda concederle Acceso Total al Disco desde Ajustes del
   Sistema; también puede ejecutarse en modo desarrollo.
 
+### Session 2026-10-24 (post-implementación)
+
+- Q: ¿Qué hacer con elementos que macOS no deja mover sin autorización (apps instaladas por root)?
+  → A: Reintentar con el mecanismo del Finder, que muestra el diálogo de autorización del sistema
+  (contraseña o Touch ID); la app nunca maneja la credencial (constitución v1.1.0).
+- Q: ¿Debe el análisis cubrir más que la carpeta personal y Aplicaciones? → A: Sí, también
+  `/Library`, `/opt`, `/usr/local` y `/private/var` en modo solo lectura, y mostrar el espacio usado
+  que ninguna app puede leer (sistema macOS y datos protegidos).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ver qué está ocupando el espacio (Priority: P1)
@@ -143,8 +152,9 @@ el contenido está en la Papelera y que la carpeta raíz de la caché sigue exis
 
 - **FR-001**: La app MUST mostrar la capacidad total, el espacio usado y el espacio disponible del
   volumen de inicio.
-- **FR-002**: La app MUST analizar la carpeta personal del usuario y la carpeta de Aplicaciones y
-  presentar un ranking de ubicaciones ordenadas por tamaño ocupado en disco.
+- **FR-002**: La app MUST analizar la carpeta personal del usuario, la carpeta de Aplicaciones y,
+  en modo solo lectura, `/Library`, `/opt`, `/usr/local` y `/private/var`, presentar un ranking de
+  ubicaciones ordenadas por tamaño ocupado en disco y mostrar el espacio usado no analizable.
 - **FR-003**: Los usuarios MUST poder navegar dentro de cualquier ubicación para ver su desglose y
   volver atrás.
 - **FR-004**: El análisis MUST mostrar progreso, permitir cancelación y no bloquear la interfaz.
@@ -188,6 +198,9 @@ el contenido está en la Papelera y que la carpeta raíz de la caché sigue exis
 **Borrado seguro (transversal)**
 
 - **FR-015**: Toda eliminación MUST mover los elementos a la Papelera; ninguna MUST ser permanente.
+- **FR-015a**: Si macOS deniega el movimiento por permisos, la app MUST reintentar mediante el
+  mecanismo del Finder, que solicita autorización del sistema (contraseña o Touch ID); si aun así
+  falla, MUST indicar al usuario que active «Gestión de apps» para CleanMac.
 - **FR-016**: Toda eliminación MUST requerir una confirmación que muestre la lista de elementos y el
   tamaño total.
 - **FR-017**: La app MUST rechazar cualquier eliminación de rutas protegidas (rutas de sistema, la
@@ -233,8 +246,8 @@ el contenido está en la Papelera y que la carpeta raíz de la caché sigue exis
 
 - Usuario único y técnico (desarrollador) en un Mac personal con macOS 14 o superior y Apple
   Silicon.
-- La app no requiere privilegios de administrador; los elementos que requieran contraseña para
-  borrarse se reportan como fallidos.
+- La app no se ejecuta con privilegios de administrador; para elementos que lo requieren, macOS
+  muestra su propio diálogo de autorización.
 - El análisis cubre la carpeta personal y las carpetas de Aplicaciones; no se analiza el sistema
   operativo ni otros volúmenes en esta versión.
 - Vaciar la Papelera es responsabilidad del usuario; la app le recuerda que el espacio se libera al

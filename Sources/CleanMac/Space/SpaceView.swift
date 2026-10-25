@@ -9,6 +9,13 @@ struct SpaceView: View {
             VStack(alignment: .leading, spacing: 12) {
                 VolumeHeader(volume: model.volume)
                 scanControls
+                if let hidden = model.unaccountedSize {
+                    Label("Analizado: \(ByteFormatting.string(model.scannedSize)) · Sistema macOS y datos protegidos que ninguna app puede leer: \(ByteFormatting.string(hidden))",
+                          systemImage: "info.circle")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
                 if let summary = model.summary, summary.unreadableCount > 0 {
                     UnreadableBanner(count: summary.unreadableCount)
                 }
@@ -84,7 +91,7 @@ struct SpaceView: View {
                 Label(model.state == .scanning ? "Analizando…" : "Descubre qué ocupa tu disco",
                       systemImage: "internaldrive")
             } description: {
-                Text("Se analizan tu carpeta personal y Aplicaciones. Nada se borra sin tu confirmación y todo va a la Papelera.")
+                Text("Se analizan tu carpeta personal, Aplicaciones y las carpetas del sistema (estas últimas solo para consulta). Nada se borra sin tu confirmación y todo va a la Papelera.")
             }
         } else {
             List {

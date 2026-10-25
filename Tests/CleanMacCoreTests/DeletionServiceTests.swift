@@ -10,7 +10,7 @@ final class RecordingTrasher: Trasher, @unchecked Sendable {
 
     var calls: [URL] { lock.withLock { _calls } }
 
-    func trashItem(at url: URL) throws {
+    func trashItem(at url: URL) async throws {
         lock.withLock { _calls.append(url) }
         if failing.contains(url) {
             throw CocoaError(.fileWriteNoPermission)
@@ -64,6 +64,13 @@ final class RecordingTrasher: Trasher, @unchecked Sendable {
         #expect(result.trashed == [b])
         #expect(result.failures.map(\.url) == [a])
         #expect(result.bytesFreed >= 4_096 && result.bytesFreed < 8_192 + 4_096)
+    }
+
+    @Test func permissionErrorsExplainWhatToDo() async throws {
+        let a = try sandbox.makeFile("locked.bin", bytes: 4_096)
+        trasher.failing = [a]
+        let result = await service.trash([a])
+        #expect(result.failures.first?.reason.contains("Gestión de apps") == true)
     }
 
     @Test func missingItemsAreReportedNotTrashed() async {

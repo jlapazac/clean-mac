@@ -29,7 +29,11 @@ final class SpaceViewModel {
 
     init() {
         let home = SystemServices.homeDirectory
-        roots = [home, URL(fileURLWithPath: "/Applications")]
+        // Home and Applications can be cleaned; the system folders are listed read-only (the
+        // protection policy blocks them) so the user sees where the rest of the disk goes.
+        roots = [home.path, "/Applications", "/Library", "/opt", "/usr/local", "/private/var"]
+            .filter { FileManager.default.fileExists(atPath: $0) }
+            .map { URL(fileURLWithPath: $0, isDirectory: true) }
         scanner = DiskScanner(excludedPaths: DiskScanner.defaultExclusions(home: home))
         refreshVolume()
     }
@@ -71,6 +75,18 @@ final class SpaceViewModel {
 
     func refreshVolume() {
         volume = try? VolumeInfoProvider.startupVolume()
+    }
+
+    /// Used space that the scan could not see: the macOS system volume, protected data, local
+    /// snapshots and purgeable space.
+    var unaccountedSize: Int64? {
+        guard let summary, let volume else { return nil }
+        let scanned = summary.roots.reduce(0) { $0 + $1.size }
+        return max(0, volume.usedCapacity - scanned)
+    }
+
+    var scannedSize: Int64 {
+        summary?.roots.reduce(0) { $0 + $1.size } ?? 0
     }
 
     // MARK: Navigation

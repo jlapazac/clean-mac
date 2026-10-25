@@ -41,7 +41,7 @@ enum SystemServices {
     ]
 
     static func makeDeletionService() -> DeletionService {
-        DeletionService(policy: makePolicy())
+        DeletionService(policy: makePolicy(), trasher: WorkspaceTrasher())
     }
 
     static func makePolicy() -> ProtectionPolicy {
