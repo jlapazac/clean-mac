@@ -25,7 +25,7 @@ public struct DiskScanner: Sendable {
     public init(minimumItemSize: Int64 = 1_000_000, excludedPaths: [URL] = []) {
         self.minimumItemSize = minimumItemSize
         self.excludedPaths = excludedPaths
-        excludedSet = Set(excludedPaths.map { $0.standardizedFileURL.resolvingSymlinksInPath().path })
+        excludedSet = Set(excludedPaths.map(ProtectionPolicy.normalize))
     }
 
     public func scan(
@@ -132,7 +132,7 @@ public struct DiskScanner: Sendable {
     }
 
     private func isExcluded(_ url: URL) -> Bool {
-        !excludedSet.isEmpty && excludedSet.contains(url.standardizedFileURL.resolvingSymlinksInPath().path)
+        !excludedSet.isEmpty && excludedSet.contains(ProtectionPolicy.normalize(url))
     }
 }
 

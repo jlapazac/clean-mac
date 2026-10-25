@@ -98,16 +98,29 @@ public struct ProtectionPolicy: Sendable {
         return nil
     }
 
-    /// Standardized absolute path with `..` removed and symlinks in parent folders resolved
-    /// (the last component is kept as-is so a symlink is judged by its own location).
+    /// Canonical absolute path: `..` removed and symlinks in the parent folders resolved with
+    /// `realpath` (e.g. `/var` → `/private/var`). The last component is kept as-is so a symlink
+    /// is judged by its own location. Works for paths that do not exist yet.
     public static func normalize(_ url: URL) -> String {
-        let standardized = url.standardizedFileURL
-        let name = standardized.lastPathComponent
-        let parent = standardized.deletingLastPathComponent()
-        if standardized.path == "/" { return "/" }
-        let parentPath = parent.resolvingSymlinksInPath().path
-        let joined = parentPath == "/" ? "/" + name : parentPath + "/" + name
-        return joined.count > 1 && joined.hasSuffix("/") ? String(joined.dropLast()) : joined
+        let path = url.standardizedFileURL.path
+        if path == "/" || path.isEmpty { return "/" }
+        let trimmed = path.hasSuffix("/") ? String(path.dropLast()) : path
+        let name = (trimmed as NSString).lastPathComponent
+        var ancestor = (trimmed as NSString).deletingLastPathComponent
+        var missing: [String] = []
+        while true {
+            if let real = realpath(ancestor, nil) {
+                var resolved = String(cString: real)
+                free(real)
+                for component in missing.reversed() + [name] {
+                    resolved = resolved == "/" ? "/" + component : resolved + "/" + component
+                }
+                return resolved
+            }
+            if ancestor == "/" || ancestor.isEmpty { return trimmed }
+            missing.append((ancestor as NSString).lastPathComponent)
+            ancestor = (ancestor as NSString).deletingLastPathComponent
+        }
     }
 
     static func isDescendant(_ path: String, of ancestor: String) -> Bool {

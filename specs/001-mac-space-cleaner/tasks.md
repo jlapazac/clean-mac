@@ -83,16 +83,16 @@ description: "Task list for CleanMac implementation"
 
 ### Tests for User Story 2
 
-- [ ] T021 [P] [US2] Escribir tests de `LeftoverFinder` (coincidencia exacta, sufijos `.plist`/`.savedState`, Group Containers con prefijo de equipo, coincidencias ambiguas por nombre y prefijo de organización, exclusión de bundle IDs de otras apps, nada fuera de Library) en `Tests/CleanMacCoreTests/LeftoverFinderTests.swift`
-- [ ] T022 [P] [US2] Escribir tests de `AppInventory` (lee bundles falsos con Info.plist, detecta com.apple, un nivel de subcarpetas) en `Tests/CleanMacCoreTests/AppInventoryTests.swift`
+- [X] T021 [P] [US2] Escribir tests de `LeftoverFinder` (coincidencia exacta, sufijos `.plist`/`.savedState`, Group Containers con prefijo de equipo, coincidencias ambiguas por nombre y prefijo de organización, exclusión de bundle IDs de otras apps, nada fuera de Library) en `Tests/CleanMacCoreTests/LeftoverFinderTests.swift`
+- [X] T022 [P] [US2] Escribir tests de `AppInventory` (lee bundles falsos con Info.plist, detecta com.apple, un nivel de subcarpetas) en `Tests/CleanMacCoreTests/AppInventoryTests.swift`
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Implementar `AppInventory` en `Sources/CleanMacCore/Apps/AppInventory.swift` hasta que pase T022
-- [ ] T024 [P] [US2] Implementar `LeftoverFinder` en `Sources/CleanMacCore/Apps/LeftoverFinder.swift` hasta que pase T021
-- [ ] T025 [US2] Implementar `AppsViewModel` (carga de apps y restos en segundo plano, búsqueda, orden por nombre/tamaño, selección de restos, refresco de "en ejecución", desinstalación vía DeletionService) en `Sources/CleanMac/Apps/AppsViewModel.swift`
-- [ ] T026 [US2] Implementar `AppsView` (lista con icono, versión, tamaño paquete/restos/total, búsqueda, orden; apps de Apple deshabilitadas) en `Sources/CleanMac/Apps/AppsView.swift`
-- [ ] T027 [US2] Implementar `AppDetailView` (restos con tipo, ruta, tamaño, motivo, confianza, casillas; bloqueo si está en ejecución; confirmación y resultado) en `Sources/CleanMac/Apps/AppDetailView.swift`
+- [X] T023 [P] [US2] Implementar `AppInventory` en `Sources/CleanMacCore/Apps/AppInventory.swift` hasta que pase T022
+- [X] T024 [P] [US2] Implementar `LeftoverFinder` en `Sources/CleanMacCore/Apps/LeftoverFinder.swift` hasta que pase T021
+- [X] T025 [US2] Implementar `AppsViewModel` (carga de apps y restos en segundo plano, búsqueda, orden por nombre/tamaño, selección de restos, refresco de "en ejecución", desinstalación vía DeletionService) en `Sources/CleanMac/Apps/AppsViewModel.swift`
+- [X] T026 [US2] Implementar `AppsView` (lista con icono, versión, tamaño paquete/restos/total, búsqueda, orden; apps de Apple deshabilitadas) en `Sources/CleanMac/Apps/AppsView.swift`
+- [X] T027 [US2] Implementar `AppDetailView` (restos con tipo, ruta, tamaño, motivo, confianza, casillas; bloqueo si está en ejecución; confirmación y resultado) en `Sources/CleanMac/Apps/AppDetailView.swift`
 
 **Checkpoint**: US1 y US2 funcionan de forma independiente
 

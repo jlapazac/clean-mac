@@ -9,8 +9,11 @@ final class Sandbox {
     init() throws {
         let base = FileManager.default.temporaryDirectory
             .appendingPathComponent("CleanMacTests-\(UUID().uuidString)", isDirectory: true)
-        // Resolve /var → /private/var so paths compare equal to what the code sees.
-        root = base.resolvingSymlinksInPath()
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        // Canonical path (/private/var/...), the same form directory listings return.
+        guard let real = realpath(base.path, nil) else { throw CocoaError(.fileNoSuchFile) }
+        root = URL(fileURLWithPath: String(cString: real), isDirectory: true)
+        free(real)
         home = root.appendingPathComponent("home", isDirectory: true)
         applications = root.appendingPathComponent("Applications", isDirectory: true)
         try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)

@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum Section: String, CaseIterable, Identifiable {
+enum SidebarSection: String, CaseIterable, Identifiable {
     case space, apps, cleanup
     var id: String { rawValue }
 
@@ -22,19 +22,20 @@ enum Section: String, CaseIterable, Identifiable {
 }
 
 struct ContentView: View {
-    @State private var section: Section? = .space
+    @State private var section: SidebarSection? = .space
     @State private var space = SpaceViewModel()
+    @State private var apps = AppsViewModel()
 
     var body: some View {
         NavigationSplitView {
-            List(Section.allCases, selection: $section) { item in
+            List(SidebarSection.allCases, selection: $section) { item in
                 Label(item.title, systemImage: item.icon).tag(item)
             }
             .navigationSplitViewColumnWidth(min: 170, ideal: 190)
         } detail: {
             switch section ?? .space {
             case .space: SpaceView(model: space)
-            case .apps: Text("Aplicaciones")
+            case .apps: AppsView(model: apps)
             case .cleanup: Text("Limpieza")
             }
         }
