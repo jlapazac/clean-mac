@@ -23,6 +23,7 @@ enum Section: String, CaseIterable, Identifiable {
 
 struct ContentView: View {
     @State private var section: Section? = .space
+    @State private var space = SpaceViewModel()
 
     var body: some View {
         NavigationSplitView {
@@ -32,7 +33,7 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 170, ideal: 190)
         } detail: {
             switch section ?? .space {
-            case .space: Text("Espacio")
+            case .space: SpaceView(model: space)
             case .apps: Text("Aplicaciones")
             case .cleanup: Text("Limpieza")
             }

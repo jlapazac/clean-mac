@@ -62,14 +62,14 @@ description: "Task list for CleanMac implementation"
 
 ### Tests for User Story 1
 
-- [ ] T016 [P] [US1] Escribir tests de `DiskScanner` (umbral 1 MB y agregado "Otros", suma de tamaños, orden descendente, exclusiones, cancelación, `scanItem`, archivos que desaparecen durante el escaneo) en `Tests/CleanMacCoreTests/DiskScannerTests.swift`
+- [X] T016 [P] [US1] Escribir tests de `DiskScanner` (umbral 1 MB y agregado "Otros", suma de tamaños, orden descendente, exclusiones, cancelación, `scanItem`, archivos que desaparecen durante el escaneo) en `Tests/CleanMacCoreTests/DiskScannerTests.swift`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Implementar `VolumeInfoProvider` en `Sources/CleanMacCore/Scanning/VolumeInfoProvider.swift`
-- [ ] T018 [US1] Implementar `DiskScanner` (TaskGroup en primer nivel, progreso muestreado, cancelación cooperativa, exclusión de CloudStorage/Mobile Documents, ignorar archivos que desaparecen) en `Sources/CleanMacCore/Scanning/DiskScanner.swift` hasta que pase T016
-- [ ] T019 [US1] Implementar `SpaceViewModel` (@MainActor @Observable: estado idle/scanning/done/cancelled, ruta de navegación, selección, borrado vía DeletionService y re-escaneo del padre) en `Sources/CleanMac/Space/SpaceViewModel.swift`
-- [ ] T020 [US1] Implementar `SpaceView` (barra de uso del volumen, botón Analizar/Cancelar con progreso, lista con barras de tamaño, navegación drill-down con breadcrumb, fila "Otros elementos pequeños", menú contextual "Mostrar en Finder", casillas y botón "Mover a la Papelera", aviso de ilegibles con enlace a Acceso Total al Disco) en `Sources/CleanMac/Space/SpaceView.swift`
+- [X] T017 [P] [US1] Implementar `VolumeInfoProvider` en `Sources/CleanMacCore/Scanning/VolumeInfoProvider.swift`
+- [X] T018 [US1] Implementar `DiskScanner` (TaskGroup en primer nivel, progreso muestreado, cancelación cooperativa, exclusión de CloudStorage/Mobile Documents, ignorar archivos que desaparecen) en `Sources/CleanMacCore/Scanning/DiskScanner.swift` hasta que pase T016
+- [X] T019 [US1] Implementar `SpaceViewModel` (@MainActor @Observable: estado idle/scanning/done/cancelled, ruta de navegación, selección, borrado vía DeletionService y re-escaneo del padre) en `Sources/CleanMac/Space/SpaceViewModel.swift`
+- [X] T020 [US1] Implementar `SpaceView` (barra de uso del volumen, botón Analizar/Cancelar con progreso, lista con barras de tamaño, navegación drill-down con breadcrumb, fila "Otros elementos pequeños", menú contextual "Mostrar en Finder", casillas y botón "Mover a la Papelera", aviso de ilegibles con enlace a Acceso Total al Disco) en `Sources/CleanMac/Space/SpaceView.swift`
 
 **Checkpoint**: US1 completamente funcional (MVP)
 
