@@ -25,4 +25,4 @@
 ## Phase 5: Polish
 
 - [X] T011 README (nuevas funciones, icono, constitución) y verificación: build sin warnings, tests, `.app`, capturas de las secciones nuevas
-- [ ] T012 Publicar en `git@github.com:jlapazac/clean-mac.git`
+- [X] T012 Publicar en `git@github.com:jlapazac/clean-mac.git`
