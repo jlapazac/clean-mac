@@ -77,6 +77,7 @@ final class CleanupViewModel {
         isDeleting = true
         Task {
             lastResult = await deletionService.trash(pending.map(\.url))
+            NotificationCenter.default.post(name: .cleanMacTrashChanged, object: nil)
             isDeleting = false
             selection = []
             measureAll()

@@ -1,6 +1,8 @@
 <!--
 Sync Impact Report
-- Version change: 1.1.0 → 1.2.0 (anterior: 1.0.0 → 1.1.0)
+- Version change: 1.2.0 → 1.3.0 (historial: 1.0.0 → 1.1.0 → 1.2.0)
+- 1.3.0: I. Seguridad — única excepción al borrado no permanente: vaciar la Papelera, solo con
+  acción explícita y confirmación que muestra el tamaño, ejecutado por Finder (feature 002).
 - 1.2.0: III. Nativo, Local y Privado — se permite una medición de solo lectura (`du`) con
   privilegios de administrador, solo a petición explícita del usuario y mediante el diálogo de
   autorización del sistema; la delegación de borrado de I pasa a hacerse vía Finder.
@@ -24,6 +26,8 @@ Sync Impact Report
 
 - Ninguna operación de borrado MUST ser permanente: todo elemento eliminado MUST moverse a la
   Papelera de macOS (`FileManager.trashItem`), nunca con `removeItem`, `rm` ni equivalentes.
+- Única excepción: vaciar la Papelera. MUST requerir un botón explícito y una confirmación que
+  advierta que es permanente y muestre el tamaño, y MUST ejecutarlo Finder, nunca la app.
 - Toda eliminación MUST requerir confirmación explícita del usuario mostrando la lista final de
   rutas y el tamaño total a liberar.
 - La app MUST mantener una lista de rutas protegidas que nunca se pueden seleccionar ni borrar:
@@ -123,4 +127,4 @@ Razón: es una herramienta personal; la complejidad extra no aporta valor.
 - El "Constitution Check" de cada plan MUST verificar los principios I–VI; cualquier violación MUST
   justificarse en la tabla de Complexity Tracking del plan.
 
-**Version**: 1.2.0 | **Ratified**: 2026-10-24 | **Last Amended**: 2026-10-24
+**Version**: 1.3.0 | **Ratified**: 2026-10-24 | **Last Amended**: 2026-10-24

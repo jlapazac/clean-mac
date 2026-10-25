@@ -139,6 +139,7 @@ final class AppsViewModel {
             let result = await deletionService.trash(pending.map(\.url))
             lastResult = result
             isDeleting = false
+            NotificationCenter.default.post(name: .cleanMacTrashChanged, object: nil)
             if result.trashed.contains(appURL) {
                 apps.removeAll { $0.id == appURL }
                 selectedLeftovers[appURL] = nil

@@ -206,6 +206,7 @@ final class SpaceViewModel {
             let result = await deletionService.trash(urls)
             lastResult = result
             selection = []
+            NotificationCenter.default.post(name: .cleanMacTrashChanged, object: nil)
             if let parent { await rescan(parent) }
             isDeleting = false
             refreshVolume()
